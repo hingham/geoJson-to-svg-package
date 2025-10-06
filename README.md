@@ -2,6 +2,7 @@
 
 Generate beautiful SVG maps from GeoJSON files containing polygon data. Perfect for creating interactive maps of cities, neighborhoods, districts, and other geographic regions.
 
+<img src="seattle-simple-svg.png" alt="Seattle Neighborhoods Example" width="400">
 * Example of Seattle. Greatly simplified for example purposes.
 
 ## Features
