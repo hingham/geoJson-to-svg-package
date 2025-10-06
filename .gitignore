@@ -1,0 +1,4 @@
+# Ignore local configuration and data directories
+web/
+local-config/
+local-data/
