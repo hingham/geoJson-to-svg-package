@@ -43,18 +43,18 @@ const getSimplifiedPolygonPaths = (polygons, scale = 3, simplifyFactor = .001, p
     simplified.forEach((simplifiedPolygonCoords, index) => {
         const title = getTitle ? getTitle(polygonData[index]) : null
         const href = getHref ? getHref(polygonData[index]) : null
+        const color = assignNeighborhoodRegionColors ? allDistrictsColors[assignNeighborhoodRegionColors(polygonData[index])] : null;
         svgPaths = svgPaths + getSvgPolygonSvgPath(
-            simplifiedPolygonCoords, maxLat, minLong, maxLong, scale, title, href, allDistrictsColors[assignNeighborhoodRegionColors(polygonData[index])]
+            simplifiedPolygonCoords, maxLat, minLong, maxLong, scale, title, href, color
         )
     })
 
-    console.log(JSON.stringify(noNames))
     return svgPaths;
 }
 
 const getSimplifiedPolygonPath = (polygon, scaleFactor, simplifyFactor, maxLat, minLong, title, href) => {
     const simplified = getSimplifiedLatLongCoordinates(polygon, simplifyFactor)
-    return  getSvgPolygonSvgPath(simplified, maxLat, minLong, scale, title, href)
+    return getSvgPolygonSvgPath(simplified, maxLat, minLong, scale, title, href)
 }
 
 const parseAndRound = (str) => {
@@ -125,18 +125,18 @@ const getSvgPolygonSvgPath = (simplifiedCords, maxLat, minLong, maxLong, scale, 
     }
 
     const polygonColor = color ? createColorVariant(color) : randomcolor();
-    
+
     if (href && title) {
-       return `<a href=${href}><title>${title}</title><polygon points="${pPath}" stroke="white" stroke-width=".5" fill="${polygonColor}"/></a>`
-    } 
-    
+        return `<a href=${href}><title>${title}</title><polygon points="${pPath}" stroke="white" stroke-width=".5" fill="${polygonColor}"/></a>`
+    }
+
     if (title) {
         return `<polygon points="${pPath}" stroke="white" stroke-width=".15" fill="${polygonColor}"><title>${title}</title></polygon>`
-    } 
-    
-    
+    }
+
+
     return `<polygon points="${pPath}" stroke="white" stroke-width=".3" fill="${randomcolor()}"/>`
-    
+
 }
 
 module.exports = { getSimplifiedPolygonPaths, getSimplifiedLatLongCoordinates, getSimplifiedPolygonPath, getMaxMinFromAllPolygons }

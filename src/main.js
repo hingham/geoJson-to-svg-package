@@ -15,7 +15,7 @@ function readAndParseGeoJSON(geoJsonData, filterCallback, metaDataCallback) {
         const metaData = [];
 
         // Process each feature
-        const filtered = geoJsonData.features.filter(filterCallback);
+        const filtered = filterCallback ? geoJsonData.features.filter(filterCallback) : geoJsonData.features;
 
         for (const feature of filtered || []) {
             const metaDataForFeature = metaDataCallback ? metaDataCallback(feature) : ""
@@ -64,7 +64,6 @@ function readAndParseGeoJSON(geoJsonData, filterCallback, metaDataCallback) {
 const getSvg = (fileName, scale, simplifyFactor, { anchorTag, title, filterCallback, getMetaData, assignNeighborhoodRegionColors }) => {
     const geoJsonData = getGeoJsonData(fileName)
     const { coordinates, metaData } = readAndParseGeoJSON(geoJsonData, filterCallback, getMetaData)
-    console.log({ geoJsonData: geoJsonData.length, metaData })
 
     if (coordinates && coordinates.length !== metaData.length) {
         throw new Error("metaData and polygon coordinates are of different lengths")
@@ -74,45 +73,11 @@ const getSvg = (fileName, scale, simplifyFactor, { anchorTag, title, filterCallb
     if (coordinates.length > 0) {
         console.log('\n--- Generating SVG ---');
         // const svg = getSimplifiedPolygonPaths(geoJsonData.coordinates, geoJsonData.names, geoJsonData.hoods, scale, simplifyFactor);
-        const svg = getSimplifiedPolygonPaths(coordinates, scale, simplifyFactor, metaData, anchorTag.getHref, title.getTitle, assignNeighborhoodRegionColors);
+        const svg = getSimplifiedPolygonPaths(
+            coordinates, scale, simplifyFactor, metaData, anchorTag.getHref, title.getTitle, assignNeighborhoodRegionColors
+        );
         return svg
     }
 }
-
-
-
-// const fileName = './data/Portland_Neighborhood_Boundaries.geojson'
-// const fileName = './data/arrondissements.geojson'
-// const fileName = './data/nyc-neighborhoods.geojson'
-// const fileName = './data/seattle-city-limits.geojson'
-// const fileName = './data/neighborhoods.geojson'
-// const city = "Seattle, WA"
-// const imageDescription = "SVG"
-// const scale = 1;
-// const simplifyFactor = .001;
-// const paths = getSvg(fileName, scale, simplifyFactor, seattleInput)
-
-// const html = `
-// <!DOCTYPE html>
-// <html lang="en">
-// <head>
-//     <meta charset="UTF-8">
-//     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-//     <title>${city}</title>
-// </head>
-// <body>
-//     <h1>${city}</h1>
-//     <p>${imageDescription ? imageDescription : ""}</p>
-    
-//     <script type="module" src="main.js"></script>
-//     <div class="svg-container">
-//         <svg id="my-svg" viewbox="0 0 300 300">${paths}</svg>
-//     </div>
-// </body>
-// </html>
-// `;
-
-// writeFile('./web/index.html', html)
-// console.log(paths)
 
 module.exports = {getSvg}
