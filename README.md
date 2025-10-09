@@ -73,7 +73,7 @@ npx svg-map-generator ./config/sample-config-new-york.js -o nyc-test.html -v
 - `getMetaData(feature)`: Extract custom data from each GeoJSON feature
 - `title.getTitle(metaData)`: Generate title text for each polygon
 - `anchorTag.getHref(metaData)`: Generate href for clickable regions (or null)
-- `assignNeighborhoodRegionColors(metaData)`: Return color/category for styling
+- `assignNeighborhoodRegionColors(metaData)`: Return color/region for styling. Must return object with key region and the name of the region. Optional to assign a color to that region, aka `{region: Ballard, color: green}`. If no color is assigned a random color will be used. 
 
 ### JavaScript Config Files 
 
@@ -115,7 +115,7 @@ module.exports = {
     filterCallback: (feature) => feature,
     
     // Color by borough
-    assignNeighborhoodRegionColors: (metaData) => metaData.borough,
+    assignNeighborhoodRegionColors: (metaData) => {region: metaData.borough},
     
   }
 };
