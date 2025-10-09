@@ -69,14 +69,15 @@ const getSvg = (fileName, scale, simplifyFactor, { anchorTag, title, filterCallb
         throw new Error("metaData and polygon coordinates are of different lengths")
     }
 
+
+
     // Generate SVG with GeoJSON data
     if (coordinates.length > 0) {
         console.log('\n--- Generating SVG ---');
         // const svg = getSimplifiedPolygonPaths(geoJsonData.coordinates, geoJsonData.names, geoJsonData.hoods, scale, simplifyFactor);
-        const svg = getSimplifiedPolygonPaths(
+        return getSimplifiedPolygonPaths(
             coordinates, scale, simplifyFactor, metaData, anchorTag.getHref, title.getTitle, assignNeighborhoodRegionColors
         );
-        return svg
     }
 }
 

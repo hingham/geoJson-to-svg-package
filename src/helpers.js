@@ -9,7 +9,7 @@ Construct the path with the adjusted points. The path is relative to the contain
 
  
  */
-const { createColorVariant } = require("../../color-variation.js")
+const { createColorVariant } = require("./color-variation.js")
 
 
 const simplify = require('simplify-js')
@@ -29,27 +29,45 @@ const getSimplifiedPolygonPaths = (polygons, scale = 3, simplifyFactor = .001, p
 
     const { minLong, maxLat } = getMaxMinFromAllPolygons(simplified)
     const { maxLong } = getMaxLong(simplified)
+    const { minLat } = getMinLat(simplified)
 
     let allDistrictsColors;
     if (assignNeighborhoodRegionColors) {
         allDistrictsColors = polygonData.reduce((acc, val, index) => {
-            const district = assignNeighborhoodRegionColors(val)
-            acc[district] = randomcolor()
+            const regionColorData = assignNeighborhoodRegionColors(val)
+            if(!regionColorData.region) {
+                throw new Error("assignNeighborhoodRegionColor function must return value with key 'region'")
+            }
+            if (regionColorData.color && regionColorData.region) {
+                acc[regionColorData.region] = regionColorData.color 
+            } else {
+                acc[regionColorData.region] = randomcolor()
+            }
+            
             return acc
         }, {})
     }
 
+    const xViewLen = 100;
+    const xDistance = Math.abs(maxLong - minLong)
+    const multiplier = (xViewLen / xDistance)
+
+    const yDistance = Math.abs(maxLat - minLat)
+    const yViewLen = multiplier * yDistance
+
+    console.log({xDistance, yDistance, multiplier})
     let svgPaths = ''
     simplified.forEach((simplifiedPolygonCoords, index) => {
         const title = getTitle ? getTitle(polygonData[index]) : null
         const href = getHref ? getHref(polygonData[index]) : null
-        const color = assignNeighborhoodRegionColors ? allDistrictsColors[assignNeighborhoodRegionColors(polygonData[index])] : null;
+        const color = assignNeighborhoodRegionColors ? allDistrictsColors[assignNeighborhoodRegionColors(polygonData[index]).region] : null;
         svgPaths = svgPaths + getSvgPolygonSvgPath(
-            simplifiedPolygonCoords, maxLat, minLong, maxLong, scale, title, href, color
+            simplifiedPolygonCoords, maxLat, minLong, multiplier, title, href, color
         )
     })
 
-    return svgPaths;
+
+    return {svgPaths, xViewLen: (xViewLen), yViewLen: (yViewLen)};
 }
 
 const getSimplifiedPolygonPath = (polygon, scaleFactor, simplifyFactor, maxLat, minLong, title, href) => {
@@ -108,12 +126,23 @@ const getMaxLong = (parsedPolygons) => {
     return { maxLong }
 }
 
+const getMinLat = (parsedPolygons) => {
+    let minLat = null;
+    parsedPolygons.forEach((polygon) => {
+        polygon.forEach((cord) => {
+            minLat = minLat != null ? Math.min(cord[0], minLat) : cord[0];
+        });
+    })
+    return { minLat }
+}
 
-const getSvgPolygonSvgPath = (simplifiedCords, maxLat, minLong, maxLong, scale, title, href, color) => {
-    const squareLen = scale * 100; // for example 6 -> 600 px
-    const multiplier = squareLen / Math.abs(maxLong - minLong)
+
+const getSvgPolygonSvgPath = (simplifiedCords, maxLat, minLong, multiplier, title, href, color) => {
+
     let latInverse = maxLat * -1
     let longInverse = minLong * -1
+
+
     const adjustedParsedCords = simplifiedCords.map((cord) => {
         // console.log(cord[0], latInverse, cord[0] + latInverse)
         return [parseAndRound((cord[0] + latInverse) * -1 * multiplier), parseAndRound((cord[1] + longInverse) * 1 * multiplier)]
@@ -127,15 +156,18 @@ const getSvgPolygonSvgPath = (simplifiedCords, maxLat, minLong, maxLong, scale, 
     const polygonColor = color ? createColorVariant(color) : randomcolor();
 
     if (href && title) {
-        return `<a href=${href}><title>${title}</title><polygon points="${pPath}" stroke="white" stroke-width=".5" fill="${polygonColor}"/></a>`
+        return `<Link href=${href}><title>${title}</title><polygon points="${pPath}" fill="${polygonColor}" stroke="white" strokeWidth=".2" /></Link>`
     }
+    // if (href && title) {
+    //     return `<a href=${href}><title>${title}</title><polygon points="${pPath}" fill="${polygonColor}" stroke="white" stroke-width=".2" /></a>`
+    // }
 
     if (title) {
         return `<polygon points="${pPath}" stroke="white" stroke-width=".15" fill="${polygonColor}"><title>${title}</title></polygon>`
     }
 
 
-    return `<polygon points="${pPath}" stroke="white" stroke-width=".3" fill="${randomcolor()}"/>`
+    return `<polygon points="${pPath}" fill="${randomcolor()}"/>`
 
 }
 

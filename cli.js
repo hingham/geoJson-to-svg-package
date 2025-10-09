@@ -108,7 +108,7 @@ function main() {
 
     try {
         // Generate SVG
-        const result = getSvg(
+        const {svgPaths, xViewLen, yViewLen} = getSvg(
             config.fileName,
             config.scale || 1,
             config.simplifyFactor || 0.001,
@@ -127,14 +127,14 @@ function main() {
 <body>
     <h1>${config.city || 'SVG Map'}</h1>
     <div class="svg-container">
-        <svg id="my-svg" viewBox="0 0 300 300">${result}</svg>
+        <svg id="my-svg" viewBox="0 0 ${xViewLen} ${yViewLen}">${svgPaths}</svg>
     </div>
 </body>
 </html>`;
             fs.writeFileSync(outputFilePath, html);
         } else {
             // Generate SVG output
-            const svg = `<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">${result}</svg>`;
+            const svg = `<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">${svgPaths}</svg>`;
             fs.writeFileSync(outputFilePath, svg);
         }
 
